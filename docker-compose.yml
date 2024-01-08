@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:8080"
+  backend:
+    build:
+      context: ./spaproject
+    ports:
+      - "8000:8000"
+    depends_on:
+      - frontend
