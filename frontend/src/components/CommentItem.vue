@@ -16,7 +16,6 @@
       <ul class="comments-list">
         <li v-for="reply in comment.replies" :key="reply.id" class="comment">
           <CommentItem
-
             :comment="reply"
             :default-avatar="defaultAvatar"
             @reply-to-comment="$emit('reply-to-comment', $event)"
@@ -38,8 +37,32 @@ export default {
     if(this.comment.image !== null){
         this.loadFile();
     }
+    if(this.comment.user_profile){
+        this.loadAvatar();
+    }
   },
   methods: {
+  loadAvatar() {
+      try {
+        axios.get(`http://localhost:8000/profile/${this.comment.user_profile}`, { responseType: 'blob' })
+          .then((response) => {
+            //console.log(response.data);
+            const reader = new FileReader();
+            reader.onload = () => {
+               this.$emit('update-avatar', this.comment.user_profile, reader.result);
+
+              //this.comment.avatar = reader.result;
+            };
+            reader.readAsDataURL(response.data);
+          })
+          .catch((error) => {
+            console.error('Ошибка при загрузке изображения:', error);
+          });
+      } catch (error) {
+        console.error('Ошибка при загрузке изображения:', error);
+      }
+    },
+
   loadFile() {
      try {
         axios.get(this.comment.image, { responseType: 'blob' })
@@ -50,7 +73,7 @@ export default {
               const dataType = fileContent.split(';')[0];
               if (dataType == 'data:text/plain') {
                 const fileName = this.comment.image.split('/')[4];
-                console.log(this.comment.image.split('/'))
+                //console.log(this.comment.image.split('/'))
                 const fileNameSpan = document.createElement('span');
                 fileNameSpan.textContent = fileName;
                 fileNameSpan.classList.add('file-name');

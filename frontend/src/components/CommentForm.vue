@@ -1,15 +1,27 @@
 <template>
 <div class="overlay">
  <div class="form-container">
+  <div class="close-button">
+    <button @click="closeForm">×</button>
+  </div>
   <form @submit.prevent="submitComment">
-    <div>
+
+    <div v-if="!user.username">
       <label for="username">User Name:</label>
       <input type="text" id="username" v-model.trim="comment.username" required />
     </div>
 
-    <div>
+    <div v-if="user.username">
+      <label for="username">User Name: {{ user.username }}</label>
+    </div>
+
+    <div v-if="!user.email">
       <label for="email">E-mail:</label>
       <input type="email" id="email" v-model.trim="comment.email" required />
+    </div>
+
+    <div v-if="user.email">
+      <label for="email">E-mail: {{ user.email }}</label>
     </div>
 
     <div>
@@ -49,7 +61,11 @@ export default {
     parentId: {
       type: Number,
       default: null
-    }
+    },
+    user: {
+      type: Object,
+      default: null
+    },
   },
   components: {
 
@@ -64,7 +80,9 @@ export default {
         homepage: '',
         text: '',
         image: null,
+        avatar: null,
       },
+
 
     };
   },
@@ -111,7 +129,7 @@ export default {
         this.comment.image = null;
         return;
       } else {
-        console.log('файл текстовый формат ок')
+
         const reader = new FileReader();
         reader.onloadstart = () => {
           console.log('Начало чтения файла');
@@ -153,13 +171,26 @@ export default {
          this.captchaKey = response.data.key;
       })
       .catch(error => {
+        alert('Ошибка при загрузке капчи')
         console.error('Ошибка при загрузке капчи:', error);
       });
     },
     submitComment() {
     const commentData = new FormData();
-    commentData.append('username', this.comment.username);
-    commentData.append('email', this.comment.email);
+    if(this.user.username){
+        commentData.append('username', this.user.username);
+    }else{
+        commentData.append('username', this.comment.username);
+    }
+    if(this.user.email){
+        commentData.append('email', this.user.email);
+    }else{
+        commentData.append('email', this.comment.email);
+    }
+    if(this.user.id){
+        commentData.append('user_profile', this.user.id);
+    }
+
     commentData.append('homepage', this.comment.homepage);
     commentData.append('text', this.comment.text);
     if (this.comment.image !== null){
@@ -178,10 +209,12 @@ axios.post('http://localhost:8000/api/сheck-captcha/', { captcha_text: this.cap
           this.resetForm();
         })
         .catch(commentError => {
+          alert('Ошибка при сохранении комментария')
           console.error('Ошибка при сохранении комментария:', commentError);
         });
     } else {
-      console.error('Неправильная CAPTCHA');
+      alert('Неправильная CAPTCHA')
+      //console.error('Неправильная CAPTCHA');
     }
   })
   .catch(error => {
@@ -193,7 +226,10 @@ axios.post('http://localhost:8000/api/сheck-captcha/', { captcha_text: this.cap
     },
     cleanText() {
       this.comment.text = this.comment.text.replace(/<(?!\/?(a|code|i|strong)(?=>|\s.*>))\/?.*?>/g, '');
-    }
+    },
+     closeForm(){
+       this.$emit('close-form');
+     },
   },
   computed: {
         topLevelComments() {
@@ -214,6 +250,20 @@ axios.post('http://localhost:8000/api/сheck-captcha/', { captcha_text: this.cap
 </script>
 
 <style scoped>
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
 .overlay {
   position: fixed;
   top: 0;
