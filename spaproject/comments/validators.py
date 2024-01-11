@@ -16,7 +16,7 @@ def validate_image(value):
         mime = magic.Magic()
         file_format = mime.from_buffer(value.read(256))  # Читаем первые 1024 байта для определения типа файла
         value.seek(0)  # Возвращаем указатель чтения в начало файла после чтения байтов
-        print(f'file_format = {file_format.split(",")[0]}')
+        #print(f'file_format = {file_format.split(",")[0]}')
         if file_format.split(',')[0] not in allowed_formats:
             raise ValidationError('Недопустимый формат файла1.')
         if file_format == 'text/plain':

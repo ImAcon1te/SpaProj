@@ -1,14 +1,16 @@
 from rest_framework import serializers
-from .models import Comment
+from .models import  UserProfile,Comment
 from PIL import Image
 import magic
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from django.contrib.auth.models import User
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'email', 'homepage', 'text', 'created_at', 'parent', 'image']
+        fields = ['id', 'username', 'email', 'homepage', 'text', 'created_at', 'parent', 'image','user_profile']
         extra_kwargs = {
             'parent': {'required': False}
         }
@@ -36,3 +38,20 @@ class CommentSerializer(serializers.ModelSerializer):
                     if width > max_width or height > max_height:
                         img.thumbnail((max_width, max_height))
                         img.save(value.path)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'avatar']
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            return obj.avatar.url
+        return None
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
