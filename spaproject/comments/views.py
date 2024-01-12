@@ -111,8 +111,9 @@ class UserRegisterView(APIView):
             password = make_password(request.data.get('password'))
             user = serializer.save(password=password)
             UserProfile.objects.create(user=user)
+            user_profile = UserProfile.objects.get(user=user)
             response_data = {
-                'id': user.id,
+                'id': user_profile.id,
                 'username': user.username,
                 'email': user.email,
                 'password':user.password,
