@@ -101,6 +101,7 @@ export default {
     handleUpdateUser(updatedUser) {
       // Обновляем пользователя в данных
       this.user = updatedUser;
+      this.fetchComments();
     },
     handleUpdateAvatar(userProfileId, avatarUrl) {
       const matchingComments = this.comments.filter(comment => comment.user_profile === userProfileId);
@@ -209,8 +210,6 @@ export default {
         this.user.id = userData.id;
         this.user.username = userData.username;
         this.user.email = userData.email;
-        //console.log('авторизован!')
-        //console.log(this.user)
         this.isAuthenticated = true;
         this.showRegistration = false;
         this.showLogin = false;
